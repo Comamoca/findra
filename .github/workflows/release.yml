@@ -1,0 +1,133 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-appimage:
+    name: Build AppImage for ${{ matrix.system }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - system: x86_64-linux
+            platform: linux-amd64
+          - system: aarch64-linux
+            platform: linux-arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+            extra-platforms = ${{ matrix.system }}
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Setup Nix for cross-compilation
+        if: matrix.system == 'aarch64-linux'
+        run: |
+          # Enable ARM64 emulation
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
+          # Register ARM64 binary format
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+      - name: Build AppImage
+        run: |
+          # Build with specified system
+          nix bundle --bundler github:ralismark/nix-appimage \
+            --system ${{ matrix.system }} \
+            .#default
+        env:
+          # Allow building for other architectures
+          NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM: "1"
+
+      - name: Rename AppImage
+        run: |
+          # Find the generated AppImage
+          APPIMAGE=$(find . -name "*.AppImage" -type f | head -n 1)
+          if [ -z "$APPIMAGE" ]; then
+            echo "Error: AppImage not found"
+            exit 1
+          fi
+
+          # Get version from tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+
+          # Rename with platform suffix
+          NEW_NAME="findra-${VERSION}-${{ matrix.platform }}.AppImage"
+          mv "$APPIMAGE" "$NEW_NAME"
+          echo "APPIMAGE_PATH=$NEW_NAME" >> $GITHUB_ENV
+
+          # Make it executable
+          chmod +x "$NEW_NAME"
+
+      - name: Upload AppImage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-${{ matrix.platform }}
+          path: ${{ env.APPIMAGE_PATH }}
+          if-no-files-found: error
+
+  create-release:
+    name: Create GitHub Release
+    needs: build-appimage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*.AppImage
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            Download the AppImage for your platform:
+            - **Linux x86_64 (64-bit Intel/AMD)**: `findra-*-linux-amd64.AppImage`
+            - **Linux ARM64 (64-bit ARM)**: `findra-*-linux-arm64.AppImage`
+
+            ### Usage
+
+            ```bash
+            # Make it executable
+            chmod +x findra-*.AppImage
+
+            # Run it
+            ./findra-*.AppImage --help
+            ```
+
+            ## What's Changed
+
+            See the full changelog below.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

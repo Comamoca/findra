@@ -14,6 +14,27 @@ A CLI tool for creating and managing sandbox directories, inspired by try-cli. Q
 
 ## Installation
 
+### Binary Releases (Recommended)
+
+Download the latest AppImage from [GitHub Releases](https://github.com/Comamoca/findra/releases):
+
+```bash
+# Download the AppImage (replace VERSION with actual version)
+wget https://github.com/Comamoca/findra/releases/latest/download/findra-VERSION-linux-amd64.AppImage
+
+# Make it executable
+chmod +x findra-VERSION-linux-amd64.AppImage
+
+# Run it
+./findra-VERSION-linux-amd64.AppImage --help
+```
+
+Available platforms:
+- **Linux x86_64**: `findra-*-linux-amd64.AppImage`
+- **Linux ARM64**: `findra-*-linux-arm64.AppImage`
+
+### From Source (Gleam)
+
 ```sh
 gleam add findra@1
 ```
@@ -22,6 +43,16 @@ Or build from source:
 
 ```sh
 gleam build
+```
+
+### From Source (Nix)
+
+```sh
+# Build with Nix
+nix build
+
+# Or run directly
+nix run
 ```
 
 ## Usage
