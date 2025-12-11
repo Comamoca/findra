@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+if [[ ! -d "/home/coma/.ghq/github.com/Comamoca/findra" ]]; then
+  echo "Cannot find source directory; Did you move it?"
+  echo "(Looking for "/home/coma/.ghq/github.com/Comamoca/findra")"
+  echo 'Cannot force reload with this script - use "direnv reload" manually and then try again'
+  exit 1
+fi
+
+# rebuild the cache forcefully
+_nix_direnv_force_reload=1 direnv exec "/home/coma/.ghq/github.com/Comamoca/findra" true
+
+# Update the mtime for .envrc.
+# This will cause direnv to reload again - but without re-building.
+touch "/home/coma/.ghq/github.com/Comamoca/findra/.envrc"
+
+# Also update the timestamp of whatever profile_rc we have.
+# This makes sure that we know we are up to date.
+touch -r "/home/coma/.ghq/github.com/Comamoca/findra/.envrc" "/home/coma/.ghq/github.com/Comamoca/findra/.direnv"/*.rc

@@ -4,25 +4,26 @@ import gleam/result
 import simplifile
 import xdgleam
 
-pub fn default_dir() {
+/// Returns the default findra directory path (~/.findra)
+pub fn default_dir() -> Result(String, Nil) {
   use home <- result.try(xdgleam.home())
   Ok(filepath.join(home, ".findra"))
 }
 
-pub fn describe_error(error) {
-  case error {
-    _ -> ""
-  }
-}
+/// Extracts all subdirectories from the given directory path
+/// Returns a Result containing list of directory paths
+pub fn extract_directories(
+  current: String,
+) -> Result(List(String), simplifile.FileError) {
+  use files <- result.try(simplifile.read_directory(current))
 
-pub fn extract_directories(current: String) {
-  let assert Ok(files) = simplifile.read_directory(current)
-
-  list.map(files, fn(filename) { filepath.join(current, filename) })
+  files
+  |> list.map(fn(filename) { filepath.join(current, filename) })
   |> list.filter_map(fn(path) {
     case simplifile.is_directory(path) {
-      Error(_) -> Error(Nil)
-      Ok(_) -> Ok(path)
+      Ok(True) -> Ok(path)
+      _ -> Error(Nil)
     }
   })
+  |> Ok
 }

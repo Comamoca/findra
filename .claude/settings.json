@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "gleam check"
+          },
+          {
+            "type": "command",
+            "command": "gleam format"
+          }
+        ]
+      }
+    ]
+  }
+}
