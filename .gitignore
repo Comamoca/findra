@@ -6,3 +6,5 @@ erl_crash.dump
 # Nix build artifacts
 findra.AppImage
 result
+
+.claude
