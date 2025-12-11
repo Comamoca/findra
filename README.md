@@ -1,144 +1,176 @@
+<div align="center">
+
+![Last commit](https://img.shields.io/github/last-commit/Comamoca/findra?style=flat-square)
+![Repository Stars](https://img.shields.io/github/stars/Comamoca/findra?style=flat-square)
+![Issues](https://img.shields.io/github/issues/Comamoca/findra?style=flat-square)
+![Open Issues](https://img.shields.io/github/issues-raw/Comamoca/findra?style=flat-square)
+![Bug Issues](https://img.shields.io/github/issues/Comamoca/findra/bug?style=flat-square)
+
+<img src="https://emoji2svg.deno.dev/api/📦" alt="eyecatch" height="100">
+
 # findra
 
-[![Package Version](https://img.shields.io/hexpm/v/findra)](https://hex.pm/packages/findra)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/findra/)
+A simple and fast repository management CLI tool written in Gleam.
 
-A CLI tool for creating and managing sandbox directories, inspired by try-cli. Quickly create temporary workspaces for experimenting with code, cloning repositories, or organizing project prototypes.
+<br>
+<br>
 
-## Features
 
-- **get** - Clone Git repositories or create directories in your sandbox
-- **list** - Display all sandbox directories
-- **init** - Initialize the default sandbox directory (~/.findra)
-- **root** - Show the default sandbox directory path
+</div>
 
-## Installation
+<div align="center">
 
-### Binary Releases (Recommended)
+</div>
 
-Download the latest AppImage from [GitHub Releases](https://github.com/Comamoca/findra/releases):
+## 🚀 How to use
 
-```bash
-# Download the AppImage (replace VERSION with actual version)
-wget https://github.com/Comamoca/findra/releases/latest/download/findra-VERSION-linux-amd64.AppImage
-
-# Make it executable
-chmod +x findra-VERSION-linux-amd64.AppImage
-
-# Run it
-./findra-VERSION-linux-amd64.AppImage --help
+Initialize the default directory (~/.findra):
+```sh
+findra init
 ```
 
-Available platforms:
-- **Linux x86_64**: `findra-*-linux-amd64.AppImage`
-- **Linux ARM64**: `findra-*-linux-arm64.AppImage`
-
-### From Source (Gleam)
-
+Clone a Git repository or create a directory:
 ```sh
-gleam add findra@1
+# Clone a Git repository
+findra get https://github.com/user/repo
+
+# Create a new directory
+findra get myproject
 ```
 
-Or build from source:
+List all managed directories:
+```sh
+findra list
+```
+
+Show the root directory path:
+```sh
+findra root
+```
+
+## ⬇️  Install
+
+### From Releases
+
+Download the latest AppImage from the [releases page](https://github.com/Comamoca/findra/releases):
 
 ```sh
+# Download and make executable
+chmod +x findra.AppImage
+
+# Move to a directory in your PATH
+mv findra.AppImage ~/.local/bin/findra
+```
+
+### From Source
+
+Requirements:
+- Gleam (>= 0.44.0)
+- Erlang/OTP
+
+Build from source:
+
+```sh
+# Clone the repository
+git clone https://github.com/Comamoca/findra
+cd findra
+
+# Build the project
+gleam build
+
+# Run
+gleam run
+```
+
+### With Nix
+
+If you have Nix with flakes enabled:
+
+```sh
+# Run directly
+nix run github:Comamoca/findra
+
+# Or build
+nix build
+```
+
+
+## ⛏️   Development
+
+### Prerequisites
+
+- Gleam (>= 0.44.0)
+- Erlang/OTP
+- Git
+
+### Setup
+
+```sh
+# Clone the repository
+git clone https://github.com/Comamoca/findra
+cd findra
+
+# Install dependencies (automatically handled by Gleam)
 gleam build
 ```
 
-### From Source (Nix)
-
-```sh
-# Build with Nix
-nix build
-
-# Or run directly
-nix run
-```
-
-## Usage
-
-### Initialize the sandbox directory
-
-```sh
-gleam run -- init
-```
-
-This creates the default directory at `~/.findra`.
-
-### Create or clone into the sandbox
-
-Clone a Git repository:
-
-```sh
-gleam run -- get https://github.com/user/repo
-```
-
-Create a named directory:
-
-```sh
-gleam run -- get my-project
-```
-
-### List all sandbox directories
-
-```sh
-gleam run -- list
-```
-
-### Show the sandbox root path
-
-```sh
-gleam run -- root
-```
-
-### Get help
-
-```sh
-gleam run -- --help
-```
-
-## Development
-
-```sh
-gleam run   # Run the project
-gleam test  # Run the tests
-gleam format  # Format code
-```
-
 ### Running Tests
-
-The project includes comprehensive tests covering:
-- Utility functions (directory operations, path handling)
-- Error handling and edge cases
-- Empty directory handling
-- Idempotent operations
-
-Run the test suite:
 
 ```sh
 gleam test
 ```
 
-## Architecture
+### Development with Nix
 
-The codebase is organized into modules:
+If using Nix with flakes:
 
-- `src/findra.gleam` - Main entry point with command dispatch logic
-- `src/option.gleam` - CLI argument parser configuration
-- `src/utils.gleam` - Shared utility functions for directory operations
-- `src/command/` - Individual command implementations
-  - `get.gleam` - Clone or create directories
-  - `list.gleam` - List sandbox directories
-  - `init.gleam` - Initialize the sandbox
-  - `root.gleam` - Show sandbox root path
+```sh
+# Enter development shell
+nix develop
 
-## Contributing
+# Build
+gleam build
 
-Contributions are welcome! The codebase follows these principles:
+# Run
+gleam run
+```
+## 📝 Todo
 
-- Clear separation of concerns with modular design
-- Consistent error handling using Result types
-- Comprehensive test coverage
-- Documentation for all public functions
+- [ ] Add configuration file support (.findrarc)
+- [ ] Support for custom directory structures
+- [ ] Add command to search repositories
+- [ ] Integration with fzf for interactive selection
+- [ ] Add update command for repositories
 
-Further documentation can be found at <https://hexdocs.pm/findra>.
+## 📜 License
+
+MIT License (to be added)
+
+### 🧩 Modules
+
+findra uses the following Gleam packages:
+
+- [gleam_stdlib](https://hex.pm/packages/gleam_stdlib) - Gleam standard library
+- [simplifile](https://hex.pm/packages/simplifile) - File system operations
+- [filepath](https://hex.pm/packages/filepath) - Cross-platform file path handling
+- [argv](https://hex.pm/packages/argv) - Command-line argument parsing
+- [xdgleam](https://hex.pm/packages/xdgleam) - XDG Base Directory support
+- [snag](https://hex.pm/packages/snag) - Error handling
+- [shellout](https://hex.pm/packages/shellout) - Shell command execution
+- [glap](https://hex.pm/packages/glap) - CLI argument parser
+- [gleeunit](https://hex.pm/packages/gleeunit) - Testing framework (dev dependency)
+
+## 👏 Affected projects
+
+This project was inspired by:
+
+- [ghq](https://github.com/x-motemen/ghq) - Remote repository management made easy
+- Repository management tools in general that help organize development projects
+
+## 💕 Special Thanks
+
+Special thanks to:
+
+- The [Gleam](https://gleam.run/) team for creating an amazing language
+- All the contributors of the Gleam packages used in this project
+- The open-source community for inspiration and support
