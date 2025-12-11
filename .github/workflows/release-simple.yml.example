@@ -1,0 +1,87 @@
+# Simpler release workflow (x86_64 only)
+# If cross-compilation fails, rename this file to release.yml
+# and use it instead of the full version.
+
+name: Release (Simple)
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build-and-release:
+    name: Build and Release AppImage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: devenv
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
+      - name: Build AppImage
+        run: |
+          nix bundle --bundler github:ralismark/nix-appimage .#default
+
+      - name: Rename AppImage
+        run: |
+          # Find the generated AppImage
+          APPIMAGE=$(find . -name "*.AppImage" -type f | head -n 1)
+          if [ -z "$APPIMAGE" ]; then
+            echo "Error: AppImage not found"
+            exit 1
+          fi
+
+          # Get version from tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+
+          # Rename with version
+          NEW_NAME="findra-${VERSION}-linux-amd64.AppImage"
+          mv "$APPIMAGE" "$NEW_NAME"
+          chmod +x "$NEW_NAME"
+
+          echo "Built: $NEW_NAME"
+          ls -lh "$NEW_NAME"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: findra-*.AppImage
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            Download the AppImage:
+
+            ```bash
+            # Download
+            wget https://github.com/Comamoca/findra/releases/download/${{ github.ref_name }}/findra-${{ github.ref_name }}-linux-amd64.AppImage
+
+            # Make executable
+            chmod +x findra-*.AppImage
+
+            # Run
+            ./findra-*.AppImage --help
+            ```
+
+            ## What's Changed
+
+            See the changelog below.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
