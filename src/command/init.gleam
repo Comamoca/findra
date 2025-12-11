@@ -1,37 +1,22 @@
 import gleam/io
 import gleam/result
-import simplifile
 import snag
 import utils
 
-pub fn main() {
-  use default_dir <- result.try(
-    utils.default_dir()
-    |> result.map_error(fn(_) { snag.new("Unable to get default directory") }),
-  )
+pub fn main() -> Result(Nil, snag.Snag) {
+  use default_dir <- result.try(utils.get_default_dir())
 
-  // Check if default_dir exists
-  let dir_exists = case simplifile.is_directory(default_dir) {
-    Ok(True) -> True
-    _ -> False
-  }
-
-  // Create directory if it doesn't exist
-  use _ <- result.try(case dir_exists {
-    True -> {
+  // Check if directory already exists
+  case utils.directory_exists(default_dir) {
+    Ok(True) -> {
       io.println("Directory already exists: " <> default_dir)
       Ok(Nil)
     }
-    False -> {
+    _ -> {
       io.println("Creating directory: " <> default_dir)
-      simplifile.create_directory_all(default_dir)
-      |> result.map_error(fn(e) {
-        snag.new("Failed to create directory: " <> simplifile.describe_error(e))
-      })
+      use _ <- result.try(utils.ensure_directory(default_dir))
+      io.println("Initialized successfully!")
+      Ok(Nil)
     }
-  })
-
-  io.println("Initialized successfully!")
-
-  Ok(Nil)
+  }
 }

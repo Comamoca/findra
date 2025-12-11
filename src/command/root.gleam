@@ -1,15 +1,10 @@
 import gleam/io
+import gleam/result
 import snag
 import utils
 
-pub fn main() {
-  case utils.default_dir() {
-    Ok(dir) -> {
-      io.println(dir)
-      Ok(Nil)
-    }
-    Error(_) -> {
-      Error(snag.new("Unable to get default directory"))
-    }
-  }
+pub fn main() -> Result(Nil, snag.Snag) {
+  use dir <- result.try(utils.get_default_dir())
+  io.println(dir)
+  Ok(Nil)
 }

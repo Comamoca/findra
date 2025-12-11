@@ -3,60 +3,60 @@ import gleam/io
 import gleam/result
 import gleam/string
 import shellout
-import simplifile
 import snag
 import utils
 
-pub fn main(source: String) {
-  use default_dir <- result.try(
-    utils.default_dir()
-    |> result.map_error(fn(_) { snag.new("Unable to get default directory") }),
-  )
+/// Determines if the source string is a Git URL
+fn is_git_url(source: String) -> Bool {
+  string.starts_with(source, "http://")
+  || string.starts_with(source, "https://")
+  || string.starts_with(source, "git@")
+}
 
-  // Check if source is a Git URL (http://, https://, git@)
-  let is_git_url =
-    string.starts_with(source, "http://")
-    || string.starts_with(source, "https://")
-    || string.starts_with(source, "git@")
+/// Clones a Git repository to the default directory
+fn clone_repository(
+  source: String,
+  default_dir: String,
+) -> Result(Nil, snag.Snag) {
+  io.println("Cloning repository: " <> source)
 
-  case is_git_url {
-    True -> {
-      // Clone repository
-      io.println("Cloning repository: " <> source)
-
-      let result =
-        shellout.command(
-          run: "git",
-          with: ["clone", source],
-          in: default_dir,
-          opt: [],
-        )
-
-      case result {
-        Ok(_) -> {
-          io.println("Successfully cloned to: " <> default_dir)
-          Ok(Nil)
-        }
-        Error(#(exit_code, output)) -> {
-          Error(snag.new(
-            "Failed to clone repository (exit code: "
-            <> string.inspect(exit_code)
-            <> "): "
-            <> output,
-          ))
-        }
-      }
+  case
+    shellout.command(
+      run: "git",
+      with: ["clone", source],
+      in: default_dir,
+      opt: [],
+    )
+  {
+    Ok(_) -> {
+      io.println("Successfully cloned to: " <> default_dir)
+      Ok(Nil)
     }
-    False -> {
-      // Create directory
-      let target_path = filepath.join(default_dir, source)
-      io.println(target_path)
+    Error(#(exit_code, output)) ->
+      Error(snag.new(
+        "Failed to clone repository (exit code: "
+        <> string.inspect(exit_code)
+        <> "): "
+        <> output,
+      ))
+  }
+}
 
-      simplifile.create_directory_all(target_path)
-      |> result.map_error(fn(e) {
-        snag.new("Failed to create directory: " <> simplifile.describe_error(e))
-      })
-      |> result.map(fn(_) { Nil })
-    }
+/// Creates a new directory in the default directory
+fn create_directory(
+  source: String,
+  default_dir: String,
+) -> Result(Nil, snag.Snag) {
+  let target_path = filepath.join(default_dir, source)
+  io.println(target_path)
+  utils.ensure_directory(target_path)
+}
+
+pub fn main(source: String) -> Result(Nil, snag.Snag) {
+  use default_dir <- result.try(utils.get_default_dir())
+
+  case is_git_url(source) {
+    True -> clone_repository(source, default_dir)
+    False -> create_directory(source, default_dir)
   }
 }

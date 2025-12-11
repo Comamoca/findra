@@ -6,19 +6,9 @@ import simplifile
 import snag
 import utils
 
-pub fn main() {
-  use default_dir <- result.try(
-    utils.default_dir()
-    |> result.map_error(fn(_) { snag.new("Unable to get default directory") }),
-  )
-
-  // Check if default_dir exists
-  use dir_exists <- result.try(
-    simplifile.is_directory(default_dir)
-    |> result.map_error(fn(e) {
-      snag.new("Failed to check directory: " <> simplifile.describe_error(e))
-    }),
-  )
+pub fn main() -> Result(Nil, snag.Snag) {
+  use default_dir <- result.try(utils.get_default_dir())
+  use dir_exists <- result.try(utils.directory_exists(default_dir))
 
   case dir_exists {
     False -> {
