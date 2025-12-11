@@ -23,22 +23,6 @@ lib.makeScope newScope (self: {
     };
   };
 
-  clip = buildGleam {
-    name = "clip";
-    version = "1.0.0";
-    otpApplication = "clip";
-
-    src = fetchHex {
-      pkg = "clip";
-      version = "1.0.0";
-      sha256 = "sha256-ZpvqI9Bn+JsnSg6GlTPS7HwNsbXmUKA0OcRVh0mUXpQ=";
-    };
-
-    beamDeps = with self; [
-      gleam_stdlib
-    ];
-  };
-
   envoy = buildGleam {
     name = "envoy";
     version = "1.1.0";
@@ -71,6 +55,23 @@ lib.makeScope newScope (self: {
     ];
   };
 
+  glap = buildGleam {
+    name = "glap";
+    version = "1.0.19";
+    otpApplication = "glap";
+
+    src = fetchHex {
+      pkg = "glap";
+      version = "1.0.19";
+      sha256 = "sha256-I+rv/mWPjdECQ2XfbZD1lqP1aIybqr9sTEjXjpq1tSE=";
+    };
+
+    beamDeps = with self; [
+      argv
+      gleam_stdlib
+    ];
+  };
+
   gleam_stdlib = buildGleam {
     name = "gleam_stdlib";
     version = "0.67.1";
@@ -92,6 +93,22 @@ lib.makeScope newScope (self: {
       pkg = "gleeunit";
       version = "1.9.0";
       sha256 = "sha256-2pVTzli2eSSzxjH5b+M3DEnrbW3Gs4TsSGLMSqpxjzw=";
+    };
+
+    beamDeps = with self; [
+      gleam_stdlib
+    ];
+  };
+
+  shellout = buildGleam {
+    name = "shellout";
+    version = "1.7.0";
+    otpApplication = "shellout";
+
+    src = fetchHex {
+      pkg = "shellout";
+      version = "1.7.0";
+      sha256 = "sha256-G9wDQ4/rl6avPjlvSr6zK+zyDfJFLsmowKzre933CxQ=";
     };
 
     beamDeps = with self; [
