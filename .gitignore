@@ -2,3 +2,7 @@
 *.ez
 /build
 erl_crash.dump
+
+# Nix build artifacts
+findra.AppImage
+result
